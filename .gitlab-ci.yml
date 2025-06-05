@@ -1,0 +1,22 @@
+stages:
+  - deploy
+
+before_script:
+  - echo "nameserver 192.168.2.126" > /etc/resolv.conf
+  - cat /etc/resolv.conf
+
+
+deploy_to_github:
+  stage: deploy
+  image: alpine/git
+  #when: manual
+  script:
+    # Configurar el usuario de Git
+    # Se cambio en Gitlab->CI a estragia clone depth 0 si no fallaba el deploy
+    - git config --global user.name "GitLabCI"
+    - git config --global user.email "ci-bot@no.domain"
+    - git for-each-ref --format='delete %(refname)' refs/pipelines/ refs/merge-requests/ | git update-ref --stdin
+    - git fsck --full
+    - git remote add github https://oauth2:${GITHUB_TOKEN}@github.com/diegargon/styx-kernel.git
+    - git checkout -B main
+    - git push github --mirror --force
