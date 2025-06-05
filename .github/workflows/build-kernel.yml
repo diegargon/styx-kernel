@@ -15,11 +15,32 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libncurses-dev bison flex libssl-dev libelf-dev wget xz-utils
+          sudo apt-get install -y \
+            build-essential \
+            libncurses-dev \
+            bison \
+            flex \
+            libssl-dev \
+            libelf-dev \
+            wget \
+            xz-utils \
+            bc \
+            dwarves \
+            cpio \
+            liblz4-tool \
+            python3
+
+      - name: Cache Linux kernel tarball
+        uses: actions/cache@v4
+        with:
+          path: linux-6.12.32.tar.xz
+          key: linux-kernel-6.12.32
 
       - name: Download Linux kernel source
         run: |
-          wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.12.32.tar.xz
+          if [ ! -f linux-6.12.32.tar.xz ]; then
+            wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.12.32.tar.xz
+          fi
           tar -xf linux-6.12.32.tar.xz
 
       - name: Build kernel (default config)
