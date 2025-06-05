@@ -43,8 +43,22 @@ jobs:
           fi
           tar -xf linux-6.12.32.tar.xz
 
-      - name: Build kernel (default config)
+      - name: Prepare kernel config
+        run: |
+          cp $GITHUB_WORKSPACE/x86_64_config linux-6.12.32/.config
+          DATE=$(date +%y%m%d%H%M)
+          sed -i "/^CONFIG_LOCALVERSION=/d" linux-6.12.32/.config
+          echo "CONFIG_LOCALVERSION=\"-$DATE\"" >> linux-6.12.32/.config
+
+      - name: Build kernel and generate .deb packages
         run: |
           cd linux-6.12.32
-          make defconfig
-          make -j$(nproc)
+          make olddefconfig
+          make -j$(nproc) deb-pkg
+
+      - name: Upload .deb packages to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ../*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
