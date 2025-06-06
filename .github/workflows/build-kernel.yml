@@ -100,33 +100,22 @@ jobs:
           cd linux-${KERNEL_VERSION}
           sed -i "1s/(\(.*\))/\(6.12.32-styx-${STYX_BUILD}\)/" debian/changelog
 
-#      - name: Initialize git repo in kernel source (need for debian packaging)
-#        run: |
-#          cd linux-${KERNEL_VERSION}
-#          git init
-#          git config user.email "ci@example.com"
-#          git config user.name "CI"
-#          git add .
-#          git commit -m "init"
-
-      - name: Build kernel packages
+      - name: Initialize git repo in kernel source (need for debian packaging)
         run: |
           cd linux-${KERNEL_VERSION}
+          git init
+          git config user.email "ci@example.com"
+          git config user.name "CI"
+          git add .
+          git commit -m "init"
 
-          # 1. Bloquear metadatos automáticos
-          touch .scmversion  # Desactiva Git
-          echo "6.12.32-styx-${STYX_BUILD}" > localversion  # Fuerza el nombre
-
-          # 2. Configuración manual (sin depender de scripts/package/Makefile)
-          echo "linux-styx-$KERNEL_VERSION" > debian/changelog
-          echo "6.12.32-styx-$STYX_BUILD" > include/config/kernel.release
-
-          # 3. Compilación con overrides directos
-          fakeroot make -j$(nproc) \
-              KBUILD_BUILD_VERSION="" \
-              KDEB_PKGVERSION="" \
-              LOCALVERSION="-styx-$STYX_BUILD" \
-              deb-pkg
+      - name: Build kernel and generate .deb packages
+        run: |
+          cd linux-${KERNEL_VERSION}
+          export KBUILD_BUILD_VERSION="test"
+          export KDEB_PKGVERSION="1"
+          export DEB_BUILD_OPTIONS="nostrip nocheck"
+          fakeroot make -j$(nproc) deb-pkg
 
       - name: Copy postinst script for kernel package
         run: |
