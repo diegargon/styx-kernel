@@ -98,24 +98,34 @@ jobs:
       - name: Update debian changelog for custom version
         run: |
           cd linux-${KERNEL_VERSION}
-          sed -i "1s/(\(.*\))/\(6.12.32-styx-${STYX_BUILD}-1\)/" debian/changelog
+          sed -i "1s/(\(.*\))/\(6.12.32-styx-${STYX_BUILD}\)/" debian/changelog
 
-      - name: Initialize git repo in kernel source (need for debian packaging)
+#      - name: Initialize git repo in kernel source (need for debian packaging)
+#        run: |
+#          cd linux-${KERNEL_VERSION}
+#          git init
+#          git config user.email "ci@example.com"
+#          git config user.name "CI"
+#          git add .
+#          git commit -m "init"
+
+      - name: Build kernel packages
         run: |
           cd linux-${KERNEL_VERSION}
-          git init
-          git config user.email "ci@example.com"
-          git config user.name "CI"
-          git add .
-          git commit -m "init"
 
-      - name: Build kernel and generate .deb packages
-        run: |
-          cd linux-${KERNEL_VERSION}
-          export KBUILD_BUILD_VERSION=""
-          export KDEB_PKGVERSION=""
-          export DEB_BUILD_OPTIONS="nostrip nocheck"
-          fakeroot make -j$(nproc) deb-pkg
+          # 1. Anula TODOS los metadatos automáticos
+          touch .scmversion  # Bloquea detección de Git
+          echo "6.12.32-styx-${STYX_BUILD}" > include/config/kernel.release
+
+          # 2. Fuerza nombres limpios en el sistema Debian
+          sed -i 's/dpkg-gencontrol -p$(pkg_name)/dpkg-gencontrol -p$(pkg_name) -v"${STYX_BUILD}"/' scripts/package/Makefile
+
+          # 3. Compila con overrides radicales
+          fakeroot make -j$(nproc) \
+              KBUILD_BUILD_VERSION="" \
+              KDEB_PKGVERSION="1" \
+              LOCALVERSION="-styx-${STYX_BUILD}" \
+              deb-pkg
 
       - name: Copy postinst script for kernel package
         run: |
