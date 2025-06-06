@@ -61,9 +61,22 @@ jobs:
       - name: Prepare kernel config
         run: |
           cp $GITHUB_WORKSPACE/x86_64_config linux-6.12.32/.config
+
+      - name: Set kernel localversion
+        run: |
+          cd linux-6.12.32
+          make olddefconfig
           DATE=$(date +%y%m%d%H%M)
-          sed -i "/^CONFIG_LOCALVERSION=/d" linux-6.12.32/.config
-          echo "CONFIG_LOCALVERSION=\"-styx-$DATE\"" >> linux-6.12.32/.config
+          sed -i "/^CONFIG_LOCALVERSION=/d" .config
+          echo "CONFIG_LOCALVERSION=\"-styx-$DATE\"" >> .config
+          scripts/config --set-str LOCALVERSION "-styx-$DATE"
+          scripts/config --disable LOCALVERSION_AUTO
+
+      - name: Update debian changelog for custom version
+        run: |
+          cd linux-6.12.32
+          DATE=$(date +%y%m%d%H%M)
+          sed -i "1s/(\(.*\))/\(6.12.32-styx-$DATE-1\)/" debian/changelog
 
       - name: Initialize git repo in kernel source
         run: |
@@ -77,8 +90,29 @@ jobs:
       - name: Build kernel and generate .deb packages
         run: |
           cd linux-6.12.32
-          make olddefconfig
           fakeroot make -j$(nproc) deb-pkg
+
+      - name: Add postinst script for kernel package
+        run: |
+          cd linux-6.12.32
+          for pkg in debian/*; do
+            if echo "$pkg" | grep -q '^debian/linux-image'; then
+cat <<'EOF' > debian/postinst
+#!/bin/sh
+set -e
+if [ "$1" = "configure" ]; then
+  update-initramfs -c -k "$2" || true
+  if command -v update-grub >/dev/null 2>&1; then
+    update-grub || true
+  elif command -v grub-mkconfig >/dev/null 2>&1; then
+    grub-mkconfig -o /boot/grub/grub.cfg || true
+  fi
+fi
+exit 0
+EOF
+              chmod +x debian/postinst
+            fi
+          done
 
       - name: Upload .deb packages to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
