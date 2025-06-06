@@ -113,18 +113,19 @@ jobs:
         run: |
           cd linux-${KERNEL_VERSION}
 
-          # 1. Anula TODOS los metadatos automáticos
-          touch .scmversion  # Bloquea detección de Git
-          echo "6.12.32-styx-${STYX_BUILD}" > include/config/kernel.release
+          # 1. Bloquear metadatos automáticos
+          touch .scmversion  # Desactiva Git
+          echo "6.12.32-styx-${STYX_BUILD}" > localversion  # Fuerza el nombre
 
-          # 2. Fuerza nombres limpios en el sistema Debian
-          sed -i 's/dpkg-gencontrol -p$(pkg_name)/dpkg-gencontrol -p$(pkg_name) -v"${STYX_BUILD}"/' scripts/package/Makefile
+          # 2. Configuración manual (sin depender de scripts/package/Makefile)
+          echo "linux-styx-$KERNEL_VERSION" > debian/changelog
+          echo "6.12.32-styx-$STYX_BUILD" > include/config/kernel.release
 
-          # 3. Compila con overrides radicales
+          # 3. Compilación con overrides directos
           fakeroot make -j$(nproc) \
               KBUILD_BUILD_VERSION="" \
-              KDEB_PKGVERSION="1" \
-              LOCALVERSION="-styx-${STYX_BUILD}" \
+              KDEB_PKGVERSION="" \
+              LOCALVERSION="-styx-$STYX_BUILD" \
               deb-pkg
 
       - name: Copy postinst script for kernel package
