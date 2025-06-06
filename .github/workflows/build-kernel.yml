@@ -2,8 +2,8 @@ name: Build Linux Kernel
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -30,9 +30,15 @@ jobs:
             liblz4-tool \
             python3 \
             git \
-            debhelper-compat \
+            debhelper \
+            dh-python \
             kmod \
-            rsync
+            rsync \
+            fakeroot \
+            libudev-dev \
+            libpci-dev \
+            liblzma-dev \
+            libzstd-dev
 
       - name: Cache Linux kernel tarball
         uses: actions/cache@v4
@@ -67,9 +73,10 @@ jobs:
         run: |
           cd linux-6.12.32
           make olddefconfig
-          make -j$(nproc) deb-pkg
+          fakeroot make -j$(nproc) deb-pkg
 
       - name: Upload .deb packages to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: ../*.deb
