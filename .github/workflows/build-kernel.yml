@@ -100,7 +100,6 @@ jobs:
           cd linux-${KERNEL_VERSION}
           sed -i "1s/(\(.*\))/\(6.12.32-styx-${STYX_BUILD}-1\)/" debian/changelog
 
-
       - name: Build kernel and generate .deb packages
         run: |
           cd linux-${KERNEL_VERSION}
