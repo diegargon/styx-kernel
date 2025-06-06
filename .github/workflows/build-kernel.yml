@@ -83,17 +83,14 @@ jobs:
             sed "s/{{DATE}}/$DATE/g; s/{{DATE_R}}/$DATE_R/g" $GITHUB_WORKSPACE/debian-changelog.template > debian/changelog
           fi
 
-      - name: Prepare kernel config
+      - name: Configure the kernel
         run: |
           cp $GITHUB_WORKSPACE/x86_64_config linux-${KERNEL_VERSION}/.config
-
-      - name: Set kernel localversion
-        run: |
           cd linux-${KERNEL_VERSION}
           make olddefconfig
-          sed -i "/^CONFIG_LOCALVERSION=/d" .config
-          echo "CONFIG_LOCALVERSION=\"-styx-${STYX_BUILD}\"" >> .config
           scripts/config --disable LOCALVERSION_AUTO
+#          sed -i "/^CONFIG_LOCALVERSION=/d" .config
+#          echo "CONFIG_LOCALVERSION=\"-styx-${STYX_BUILD}\"" >> .config
 
       - name: Update debian changelog for custom version
         run: |
@@ -113,7 +110,7 @@ jobs:
         run: |
           cd linux-${KERNEL_VERSION}
           touch .scmversion
-          export KBUILD_BUILD_VERSION=""
+          export KBUILD_BUILD_VERSION="1"
           export KDEB_PKGVERSION="1"
           export DEB_BUILD_OPTIONS="nostrip nocheck"
           fakeroot make LOCALVERSION="-styx-${STYX_BUILD}" -j$(nproc) deb-pkg
