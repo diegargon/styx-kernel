@@ -100,14 +100,6 @@ jobs:
           cd linux-${KERNEL_VERSION}
           sed -i "1s/(\(.*\))/\(6.12.32-styx-${STYX_BUILD}-1\)/" debian/changelog
 
-      - name: Initialize git repo in kernel source
-        run: |
-          cd linux-${KERNEL_VERSION}
-          git init
-          git config user.email "ci@example.com"
-          git config user.name "CI"
-          git add .
-          git commit -m "init"
 
       - name: Build kernel and generate .deb packages
         run: |
@@ -125,6 +117,15 @@ jobs:
               chmod +x debian/postinst
             fi
           done
+
+      - name: Initialize git repo in kernel source
+        run: |
+          cd linux-${KERNEL_VERSION}
+          git init
+          git config user.email "ci@example.com"
+          git config user.name "CI"
+          git add .
+          git commit -m "init"
 
       - name: Upload .deb packages to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
