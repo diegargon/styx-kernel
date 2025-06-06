@@ -28,8 +28,11 @@ jobs:
             dwarves \
             cpio \
             liblz4-tool \
-            python3\
-            git
+            python3 \
+            git \
+            debhelper-compat \
+            kmod \
+            rsync
 
       - name: Cache Linux kernel tarball
         uses: actions/cache@v4
