@@ -85,6 +85,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: "*.deb"
-        working-directory: ${{ github.workspace }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
