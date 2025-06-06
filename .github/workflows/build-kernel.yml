@@ -8,8 +8,6 @@ on:
 
 env:
   KERNEL_VERSION: 6.12.32
-  KERNEL_TARBALL: linux-${{ env.KERNEL_VERSION }}.tar.xz
-  KERNEL_URL: https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${{ env.KERNEL_VERSION }}.tar.xz
   STYX_BUILD: 2
 
 permissions:
@@ -54,11 +52,13 @@ jobs:
       - name: Cache Linux kernel tarball
         uses: actions/cache@v4
         with:
-          path: ${{ env.KERNEL_TARBALL }}
+          path: linux-${{ env.KERNEL_VERSION }}.tar.xz
           key: linux-kernel-${{ env.KERNEL_VERSION }}
 
       - name: Download Linux kernel source
         run: |
+          KERNEL_TARBALL="linux-${KERNEL_VERSION}.tar.xz"
+          KERNEL_URL="https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${KERNEL_VERSION}.tar.xz"
           if [ ! -f "${KERNEL_TARBALL}" ]; then
             wget "${KERNEL_URL}"
           fi
