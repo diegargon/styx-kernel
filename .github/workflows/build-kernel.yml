@@ -113,7 +113,12 @@ jobs:
       - name: Build kernel and generate .deb packages
         run: |
           cd linux-${KERNEL_VERSION}
-          fakeroot make -j$(nproc) deb-pkg
+          # Fuerza una versión de paquete limpia (sin hash Git ni revisión adicional)
+          export KDEB_PKGVERSION="${STYX_BUILD}"
+          # Evita que el sistema Debian añada metadatos no deseados
+          export DEB_BUILD_OPTIONS="nostrip nocheck"
+          # Compila los paquetes
+          fakeroot make -j$(nproc) deb-pkg LOCALVERSION=-styx-${STYX_BUILD}
 
       - name: Copy postinst script for kernel package
         run: |
