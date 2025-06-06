@@ -6,6 +6,12 @@ on:
       - '*'
   workflow_dispatch:
 
+env:
+  KERNEL_VERSION: 6.12.32
+  KERNEL_TARBALL: linux-${{ env.KERNEL_VERSION }}.tar.xz
+  KERNEL_URL: https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${{ env.KERNEL_VERSION }}.tar.xz
+  STYX_BUILD: 2
+
 permissions:
   contents: write
   packages: write
@@ -48,19 +54,19 @@ jobs:
       - name: Cache Linux kernel tarball
         uses: actions/cache@v4
         with:
-          path: linux-6.12.32.tar.xz
-          key: linux-kernel-6.12.32
+          path: ${{ env.KERNEL_TARBALL }}
+          key: linux-kernel-${{ env.KERNEL_VERSION }}
 
       - name: Download Linux kernel source
         run: |
-          if [ ! -f linux-6.12.32.tar.xz ]; then
-            wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.12.32.tar.xz
+          if [ ! -f "${KERNEL_TARBALL}" ]; then
+            wget "${KERNEL_URL}"
           fi
-          tar -xf linux-6.12.32.tar.xz
+          tar -xf "${KERNEL_TARBALL}"
 
       - name: Add debian packaging directory if missing
         run: |
-          cd linux-6.12.32
+          cd linux-${KERNEL_VERSION}
           if [ ! -d debian ]; then
             echo "Creating minimal debian/ packaging directory..."
             mkdir -p debian
@@ -68,7 +74,7 @@ jobs:
 
       - name: Create minimal debian changelog if missing
         run: |
-          cd linux-6.12.32
+          cd linux-${KERNEL_VERSION}
           if [ ! -f debian/changelog ]; then
             echo "Creating minimal debian/changelog..."
             mkdir -p debian
@@ -79,27 +85,25 @@ jobs:
 
       - name: Prepare kernel config
         run: |
-          cp $GITHUB_WORKSPACE/x86_64_config linux-6.12.32/.config
+          cp $GITHUB_WORKSPACE/x86_64_config linux-${KERNEL_VERSION}/.config
 
       - name: Set kernel localversion
         run: |
-          cd linux-6.12.32
+          cd linux-${KERNEL_VERSION}
           make olddefconfig
-          DATE=$(date +%y%m%d%H%M)
           sed -i "/^CONFIG_LOCALVERSION=/d" .config
-          echo "CONFIG_LOCALVERSION=\"-styx-$DATE\"" >> .config
-          scripts/config --set-str LOCALVERSION "-styx-$DATE"
+          echo "CONFIG_LOCALVERSION=\"-styx-${STYX_BUILD}\"" >> .config
+          scripts/config --set-str LOCALVERSION "-styx-${STYX_BUILD}"
           scripts/config --disable LOCALVERSION_AUTO
 
       - name: Update debian changelog for custom version
         run: |
-          cd linux-6.12.32
-          DATE=$(date +%y%m%d%H%M)
-          sed -i "1s/(\(.*\))/\(6.12.32-styx-$DATE-1\)/" debian/changelog
+          cd linux-${KERNEL_VERSION}
+          sed -i "1s/(\(.*\))/\(6.12.32-styx-${STYX_BUILD}-1\)/" debian/changelog
 
       - name: Initialize git repo in kernel source
         run: |
-          cd linux-6.12.32
+          cd linux-${KERNEL_VERSION}
           git init
           git config user.email "ci@example.com"
           git config user.name "CI"
@@ -108,12 +112,12 @@ jobs:
 
       - name: Build kernel and generate .deb packages
         run: |
-          cd linux-6.12.32
+          cd linux-${KERNEL_VERSION}
           fakeroot make -j$(nproc) deb-pkg
 
       - name: Copy postinst script for kernel package
         run: |
-          cd linux-6.12.32
+          cd linux-${KERNEL_VERSION}
           for pkg in debian/*; do
             if echo "$pkg" | grep -q '^debian/linux-image'; then
               cp $GITHUB_WORKSPACE/postinst debian/postinst

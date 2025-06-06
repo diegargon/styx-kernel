@@ -1,4 +1,4 @@
-linux (6.12.32-styx-{{DATE}}-1) unstable; urgency=medium
+linux (6.12.32-styx-2) unstable; urgency=medium
 
   * Custom kernel build
 
