@@ -58,12 +58,12 @@ jobs:
           fi
           tar -xf linux-6.12.32.tar.xz
 
-      - name: Prepare debian packaging files
+      - name: Add debian packaging directory if missing
         run: |
           cd linux-6.12.32
           if [ ! -d debian ]; then
-            echo "::error ::No debian/ directory found in kernel source. Did you use the correct tarball or enable packaging?"
-            exit 1
+            echo "Creating minimal debian/ packaging directory..."
+            mkdir -p debian
           fi
 
       - name: Create minimal debian changelog if missing
