@@ -1,6 +1,5 @@
 # styx-kernel
 
 
-
 ## Getting started
 
