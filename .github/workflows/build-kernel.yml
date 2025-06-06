@@ -112,7 +112,7 @@ jobs:
       - name: Build kernel and generate .deb packages
         run: |
           cd linux-${KERNEL_VERSION}
-          export KBUILD_BUILD_VERSION="test"
+          export KBUILD_BUILD_VERSION=""
           export KDEB_PKGVERSION="1"
           export DEB_BUILD_OPTIONS="nostrip nocheck"
           fakeroot make -j$(nproc) deb-pkg
