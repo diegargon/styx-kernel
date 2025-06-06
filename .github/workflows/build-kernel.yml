@@ -28,7 +28,8 @@ jobs:
             dwarves \
             cpio \
             liblz4-tool \
-            python3
+            python3\
+            git
 
       - name: Cache Linux kernel tarball
         uses: actions/cache@v4
@@ -49,6 +50,15 @@ jobs:
           DATE=$(date +%y%m%d%H%M)
           sed -i "/^CONFIG_LOCALVERSION=/d" linux-6.12.32/.config
           echo "CONFIG_LOCALVERSION=\"-$DATE\"" >> linux-6.12.32/.config
+
+      - name: Initialize git repo in kernel source
+        run: |
+          cd linux-6.12.32
+          git init
+          git config user.email "ci@example.com"
+          git config user.name "CI"
+          git add .
+          git commit -m "init"
 
       - name: Build kernel and generate .deb packages
         run: |
