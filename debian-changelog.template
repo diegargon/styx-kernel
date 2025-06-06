@@ -1,0 +1,5 @@
+linux (6.12.32-styx-{{DATE}}-1) unstable; urgency=medium
+
+  * Custom kernel build
+
+ -- CI <ci@example.com>  {{DATE_R}}

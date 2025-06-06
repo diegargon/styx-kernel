@@ -58,6 +58,25 @@ jobs:
           fi
           tar -xf linux-6.12.32.tar.xz
 
+      - name: Prepare debian packaging files
+        run: |
+          cd linux-6.12.32
+          if [ ! -d debian ]; then
+            echo "::error ::No debian/ directory found in kernel source. Did you use the correct tarball or enable packaging?"
+            exit 1
+          fi
+
+      - name: Create minimal debian changelog if missing
+        run: |
+          cd linux-6.12.32
+          if [ ! -f debian/changelog ]; then
+            echo "Creating minimal debian/changelog..."
+            mkdir -p debian
+            DATE=$(date +%y%m%d%H%M)
+            DATE_R="$(date -R)"
+            sed "s/{{DATE}}/$DATE/g; s/{{DATE_R}}/$DATE_R/g" $GITHUB_WORKSPACE/debian-changelog.template > debian/changelog
+          fi
+
       - name: Prepare kernel config
         run: |
           cp $GITHUB_WORKSPACE/x86_64_config linux-6.12.32/.config
