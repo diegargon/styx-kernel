@@ -8,7 +8,7 @@ on:
 
 env:
   KERNEL_VERSION: 6.12.32
-  STYX_BUILD: 5
+  STYX_BUILD: 6
 
 permissions:
   contents: write
