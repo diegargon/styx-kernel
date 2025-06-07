@@ -110,10 +110,9 @@ jobs:
         run: |
           cd linux-${KERNEL_VERSION}
           touch .scmversion
-          export KBUILD_BUILD_VERSION="1"
-          export KDEB_PKGVERSION="1"
+          export KBUILD_BUILD_VERSION=""
           export DEB_BUILD_OPTIONS="nostrip nocheck"
-          fakeroot make LOCALVERSION="-styx-${STYX_BUILD}" -j$(nproc) deb-pkg
+          fakeroot make LOCALVERSION="-styx" KDEB_PKGVERSION ="${STYX_BUILD}" -j$(nproc) deb-pkg
 
       - name: Copy postinst script for kernel package
         run: |
