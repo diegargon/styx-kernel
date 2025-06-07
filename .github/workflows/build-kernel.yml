@@ -110,7 +110,7 @@ jobs:
           touch .scmversion
           export KBUILD_BUILD_VERSION=""
           export DEB_BUILD_OPTIONS="nostrip nocheck"
-          fakeroot make LOCALVERSION="-${STYX_BUILD}" KDEB_PKGVERSION="styx" -j$(nproc) deb-pkg
+          fakeroot make LOCALVERSION="" KDEB_PKGVERSION="${STYX_BUILD}-styx" -j$(nproc) deb-pkg
 
       - name: Copy postinst script for kernel package
         run: |
