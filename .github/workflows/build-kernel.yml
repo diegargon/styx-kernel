@@ -8,7 +8,7 @@ on:
 
 env:
   KERNEL_VERSION: 6.12.32
-  STYX_BUILD: 4
+  STYX_BUILD: 5
 
 permissions:
   contents: write
@@ -80,6 +80,10 @@ jobs:
             mkdir -p debian
             DATE=$(date +%y%m%d%H%M)
             DATE_R="$(date -R)"
+            if [ ! -f "$GITHUB_WORKSPACE/debian-changelog.template" ]; then
+              echo "ERROR: debian-changelog.template not found!" >&2
+              exit 1
+            fi
             sed "s/{{DATE}}/$DATE/g; s/{{DATE_R}}/$DATE_R/g" $GITHUB_WORKSPACE/debian-changelog.template > debian/changelog
           fi
 
