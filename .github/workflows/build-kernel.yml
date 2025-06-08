@@ -8,7 +8,7 @@ on:
 
 env:
   KERNEL_VERSION: 6.12.32
-  STYX_BUILD: 6
+  STYX_BUILD: 7
 
 permissions:
   contents: write
@@ -113,7 +113,7 @@ jobs:
           cd linux-${KERNEL_VERSION}
           touch .scmversion
           export KBUILD_BUILD_VERSION=""
-          export DEB_BUILD_OPTIONS="nostrip nocheck"
+          export DEB_BUILD_OPTIONS="nocheck"
           fakeroot make LOCALVERSION="-${STYX_BUILD}-styx" KDEB_PKGVERSION="${STYX_BUILD}" -j$(nproc) deb-pkg
 #          fakeroot make LOCALVERSION="" KDEB_PKGVERSION="${STYX_BUILD}-styx" -j$(nproc) deb-pkg
       - name: Copy postinst script for kernel package
