@@ -8,7 +8,7 @@ on:
 
 env:
   KERNEL_VERSION: 6.12.32
-  STYX_BUILD: 7
+  STYX_BUILD: 8
 
 permissions:
   contents: write
@@ -91,8 +91,9 @@ jobs:
         run: |
           cp $GITHUB_WORKSPACE/x86_64_config linux-${KERNEL_VERSION}/.config
           cd linux-${KERNEL_VERSION}
-          make olddefconfig
           scripts/config --disable LOCALVERSION_AUTO
+          scripts/config --set-str LOCALVERSION "-${STYX_BUILD}-styx"
+          make olddefconfig
 
       - name: Update debian changelog for custom version
         run: |
@@ -115,8 +116,7 @@ jobs:
           > .scmversion
           export KBUILD_BUILD_VERSION=""
           export DEB_BUILD_OPTIONS="nocheck"
-          fakeroot make LOCALVERSION="-${STYX_BUILD}-styx" KDEB_PKGVERSION="1" -j$(nproc) deb-pkg
-#          fakeroot make LOCALVERSION="" KDEB_PKGVERSION="${STYX_BUILD}-styx" -j$(nproc) deb-pkg
+          fakeroot make LOCALVERSION="-${STYX_BUILD}-styx" KDEB_PKGVERSION="${STYX_BUILD}" -j$(nproc) deb-pkg
       - name: Copy postinst script for kernel package
         run: |
           cd linux-${KERNEL_VERSION}
