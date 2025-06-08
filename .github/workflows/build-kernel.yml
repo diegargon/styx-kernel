@@ -111,10 +111,11 @@ jobs:
       - name: Build kernel and generate .deb packages
         run: |
           cd linux-${KERNEL_VERSION}
-          touch .scmversion
+          # Ensure empty
+          > .scmversion
           export KBUILD_BUILD_VERSION=""
           export DEB_BUILD_OPTIONS="nocheck"
-          fakeroot make LOCALVERSION="-${STYX_BUILD}-styx" KDEB_PKGVERSION="${STYX_BUILD}" -j$(nproc) deb-pkg
+          fakeroot make LOCALVERSION="-${STYX_BUILD}-styx" KDEB_PKGVERSION="1" -j$(nproc) deb-pkg
 #          fakeroot make LOCALVERSION="" KDEB_PKGVERSION="${STYX_BUILD}-styx" -j$(nproc) deb-pkg
       - name: Copy postinst script for kernel package
         run: |
