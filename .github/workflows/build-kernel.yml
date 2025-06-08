@@ -116,7 +116,8 @@ jobs:
           > .scmversion
           export KBUILD_BUILD_VERSION=""
           export DEB_BUILD_OPTIONS="nocheck"
-          fakeroot make LOCALVERSION="-${STYX_BUILD}-styx" KDEB_PKGVERSION="${STYX_BUILD}" -j$(nproc) deb-pkg
+          fakeroot make KDEB_PKGVERSION="${STYX_BUILD}" -j$(nproc) deb-pkg
+#          fakeroot make LOCALVERSION="-${STYX_BUILD}-styx" KDEB_PKGVERSION="${STYX_BUILD}" -j$(nproc) deb-pkg
       - name: Copy postinst script for kernel package
         run: |
           cd linux-${KERNEL_VERSION}
