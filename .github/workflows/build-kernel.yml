@@ -8,7 +8,7 @@ on:
 
 env:
   KERNEL_VERSION: 6.12.32
-  STYX_BUILD: 8
+  STYX_BUILD: 9
 
 permissions:
   contents: write
@@ -98,7 +98,8 @@ jobs:
       - name: Update debian changelog for custom version
         run: |
           cd linux-${KERNEL_VERSION}
-          sed -i "1s/(\(.*\))/\(6.12.32-styx-${STYX_BUILD}\)/" debian/changelog
+          sed -i "1s/(.*)/( ${KERNEL_VERSION}-${STYX_BUILD}-styx )/" debian/changelog
+#          sed -i "1s/(\(.*\))/\(6.12.32-styx-${STYX_BUILD}\)/" debian/changelog
 
       - name: Initialize git repo in kernel source (need for debian packaging)
         run: |
