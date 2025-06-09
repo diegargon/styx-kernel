@@ -8,7 +8,7 @@ on:
 
 env:
   KERNEL_VERSION: 6.12.32
-  STYX_BUILD: 9
+  STYX_BUILD: 10
 
 permissions:
   contents: write
@@ -64,6 +64,29 @@ jobs:
           fi
           tar -xf "${KERNEL_TARBALL}"
 
+      - name: Add debian packaging directory if missing
+        run: |
+          cd linux-${KERNEL_VERSION}
+          if [ ! -d debian ]; then
+            echo "Creating minimal debian/ packaging directory..."
+            mkdir -p debian
+          fi
+
+      - name: Create minimal debian changelog if missing
+        run: |
+          cd linux-${KERNEL_VERSION}
+          if [ ! -f debian/changelog ]; then
+            echo "Creating minimal debian/changelog..."
+            mkdir -p debian
+            DATE=$(date +%y%m%d%H%M)
+            DATE_R="$(date -R)"
+            if [ ! -f "$GITHUB_WORKSPACE/debian-changelog.template" ]; then
+              echo "ERROR: debian-changelog.template not found!" >&2
+              exit 1
+            fi
+            sed "s/{{DATE}}/$DATE/g; s/{{DATE_R}}/$DATE_R/g" $GITHUB_WORKSPACE/debian-changelog.template > debian/changelog
+          fi
+
       - name: Configure the kernel
         run: |
           cp $GITHUB_WORKSPACE/x86_64_config linux-${KERNEL_VERSION}/.config
@@ -71,6 +94,12 @@ jobs:
           scripts/config --disable LOCALVERSION_AUTO
           scripts/config --set-str LOCALVERSION ""
           make olddefconfig
+
+      - name: Update debian changelog for custom version
+        run: |
+          cd linux-${KERNEL_VERSION}
+          sed -i "1s/([^)]*)/(${KERNEL_VERSION}-${STYX_BUILD}-styx)/" debian/changelog
+#          sed -i "1s/(\(.*\))/\(6.12.32-styx-${STYX_BUILD}\)/" debian/changelog
 
       - name: Initialize git repo in kernel source (need for debian packaging)
         run: |
