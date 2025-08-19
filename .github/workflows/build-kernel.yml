@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 env:
-  KERNEL_VERSION: 6.12.32
-  STYX_BUILD: 10
+  KERNEL_VERSION: 6.12.42
+  STYX_BUILD: 1
 
 permissions:
   contents: write
@@ -99,7 +99,6 @@ jobs:
         run: |
           cd linux-${KERNEL_VERSION}
           sed -i "1s/([^)]*)/(${KERNEL_VERSION}-${STYX_BUILD}-styx)/" debian/changelog
-#          sed -i "1s/(\(.*\))/\(6.12.32-styx-${STYX_BUILD}\)/" debian/changelog
 
       - name: Initialize git repo in kernel source (need for debian packaging)
         run: |
