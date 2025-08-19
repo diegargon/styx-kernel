@@ -2,4 +2,4 @@
 
 Custom Kernel
 
-Latest Stable Kernel 2.12.32 revision 1
+Latest Stable Kernel 2.12.42 revision 1
